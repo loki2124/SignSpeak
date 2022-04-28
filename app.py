@@ -6,10 +6,14 @@ import time
 import cv2
 import torch
 import torch.nn as nn
+import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader,Dataset
 
 import copy
+
+#loading the model
+InceptionV3 = torchvision.models.inception_v3(pretrained=False, progress=False) 
 
 fig = plt.figure()
 
@@ -33,6 +37,7 @@ st.markdown(original_title, unsafe_allow_html=True)
 st.text("")
 st.text("")
 st.text("")
+
 
 
 class Network(nn.Module):
@@ -87,23 +92,38 @@ class Network(nn.Module):
 
       return x
 
+def initialize_inceptionv3_model(model, num_classes):
+    input_size = 0
+
+    print('Pretrained model has 1000 classes')
+    print('changing the classifier layer to predict {} labels...'.format(num_classes))
+    model.fc = torch.nn.Linear(2048, num_classes)
+    input_size = 400
+    return model, input_size
+
 
 
 def create_model_input(image):
-    image = image/255
-    image = torch.Tensor(image)
-    image = image.permute(2, 0, 1)
+    # image = image/255 #didn't use normalization here
+    image = torch.Tensor(image) 
+    image = image.permute(2, 0, 1) 
     
     img_transform = transforms.Compose([transforms.ToPILImage(),
-                                        transforms.Resize((32, 32)),
+                                        #transforms.Resize((32, 32)),
                                         transforms.ToTensor()])
 
     image = img_transform(image)
     image = torch.unsqueeze(image, dim=0)
-    print(image.shape)
     dataloader = DataLoader(image, batch_size= 1, shuffle=True)
 
     return dataloader
+
+def label_to_char(pred):
+    label_to_character = {0:"A",1:"B",2:"M",3:"D",4:"E",5:"F",6:"G",7:"H",8:"I",9:"J",10:"L",
+                          11:"L",12:"M", 13:"N",14:"NOTHING", 15:"O",16:"P",17:"P",18:"R",
+                          19:"S",20:"SPACE",21:"T",22:"U",23:"V",24:"W", 25:"X", 26:"Y", 27:"Z"}
+    pred = label_to_character[pred]
+    return pred
     
 
 def predict(image):
@@ -116,28 +136,25 @@ def predict(image):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     # Loading the saved model
-    save_path = 'MNIST_CNN.pth'
-    cnn = Network()
-    cnn.load_state_dict(copy.deepcopy(torch.load(save_path,device)))
+    save_path = './models/ASL_InceptionV3.pth'
+    model, _ = initialize_inceptionv3_model(InceptionV3, num_classes = 28)
+    model.load_state_dict(copy.deepcopy(torch.load(save_path,device)))
 
-    cnn.eval()
+    model.eval()
 
     for img in image:
         # Generate prediction
-        prediction = cnn(img)
-        
+        prediction = model(img)  
         # Predicted class value using argmax
-        predicted_class = np.argmax(prediction)
-        print(predicted_class)
+        _, preds = torch.max(prediction, 1)
+        print(preds)
 
-        return predicted_class
+        return preds
     
     
 
 def main():
-
-    dict1={0:"A",1:"B",2:"C",3:"D",4:"E",5:"F",6:"G",7:"H",8:"i",9:"k",10:"l",11:"m",12:"n",13:"o",14:"p",15:"q",16:"r",17:"s",18:"t",19:"u",20:"v",21:"w",22:"x",23:"y"}
-    
+   
     selectbox_text = '<p style="font-family:Ariel; text-align:left; color:peru; font-size:30px;">Do you want to upload an image or click a photo</p>'
     st.sidebar.markdown(selectbox_text, unsafe_allow_html=True)
     option = st.sidebar.selectbox("", ('Upload', 'Click Picture'))
@@ -154,26 +171,28 @@ def main():
         upload_image = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Upload an Image</p>'
         st.markdown(upload_image, unsafe_allow_html=True)
         file_up = st.file_uploader("", type="jpg")
-        # class_btn = st.button("Classify")
+
         if file_up is not None:    
             image = Image.open(file_up)
+            size = (400,400)
+            image.thumbnail(size)
             st.image(image, caption='Uploaded Image', use_column_width=True)
+            open_cv_image = np.array(image) 
+            open_cv_image = open_cv_image[:, :, ::-1].copy() 
+            with st.spinner('Model working....'):
+                predictions = predict(open_cv_image)
+                character = label_to_char(predictions.item())
+                time.sleep(1)
+                st.success('Classified')
+                st.title(character)
 
-        # if class_btn:
         if file_up is None:
             st.text("")
             st.text("")
             invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Invalid command, please upload an image</p>'
             st.markdown(invalid_command, unsafe_allow_html=True)
-        else:
-            with st.spinner('Model working....'):
-                plt.imshow(image)
-                plt.axis("off")
-                predictions = 'test'
-                time.sleep(1)
-                st.success('Classified')
-                st.write(predictions)
-                st.pyplot(fig)
+
+
 
     else:
         rendered_frames = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Select number of frames to render:</p>'
@@ -187,6 +206,7 @@ def main():
             img_display = st.empty()
             for _ in range(MAX_FRAMES):
                 _, img = capture.read()
+                img = cv2.resize(img, (400,400), interpolation = cv2.INTER_AREA)
                 img_display.image(img, channels='BGR')
             capture.release()
             render_complete = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Render complete</p>'
@@ -198,10 +218,10 @@ def main():
                 with st.spinner('Model working....'):
                     print('predicting the sign...')
                     predictions = predict(img)
+                    character = label_to_char(predictions.item())
                     time.sleep(1)
                     st.success('Classified')
-                    #st.write(predictions)
-                    st.title(dict1[predictions.item()])
+                    st.title(character)
 
 
 if __name__ == "__main__":
