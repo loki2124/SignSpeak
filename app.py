@@ -23,7 +23,7 @@ st.markdown(
          f"""
          <style>
          .stApp {{
-             background: url("https://static.vecteezy.com/system/resources/previews/001/437/126/non_2x/sign-language-and-hand-gestures-icon-collection-vector.jpg");
+             background: url("https://raw.githubusercontent.com/akha46/images/main/signSpeak.png");
              background-size: cover;
              background-attachment: scroll;
          }}
@@ -32,7 +32,7 @@ st.markdown(
          unsafe_allow_html=True
      )
 
-original_title = '<p style="font-family:Ariel; text-align:center; color:saddlebrown ; font-size:50px; background-color:#FEE1D1;">Sign Speak</p>'
+original_title = '<p style="font-family:Ariel; text-align:center; color:saddlebrown ; font-size:50px; background-color:#FEE1D1;opacity: 0.9;">Sign Speak</p>'
 st.markdown(original_title, unsafe_allow_html=True)
 st.text("")
 st.text("")
