@@ -14,7 +14,26 @@ import copy
 fig = plt.figure()
 
 
-st.markdown("----------------------------------------------------------- SignSpeak ----------------------------------------------------------------")
+#background: url("https://wallpapercave.com/wp/wp8099561.jpg");
+st.markdown(
+         f"""
+         <style>
+         .stApp {{
+             background: url("https://static.vecteezy.com/system/resources/previews/001/437/126/non_2x/sign-language-and-hand-gestures-icon-collection-vector.jpg");
+             background-size: cover;
+             background-attachment: scroll;
+         }}
+         </style>
+         """,
+         unsafe_allow_html=True
+     )
+
+original_title = '<p style="font-family:Ariel; text-align:center; color:saddlebrown ; font-size:50px; background-color:#FEE1D1;">Sign Speak</p>'
+st.markdown(original_title, unsafe_allow_html=True)
+st.text("")
+st.text("")
+st.text("")
+
 
 class Network(nn.Module):
     def __init__(self, num_classes=24):
@@ -117,12 +136,24 @@ def predict(image):
 
 def main():
 
-    option = st.selectbox('Do you want to upload an image or click a photo', 
-                ('Upload', 'Click Picture'))
-    st.write('You selected:', option)
+    dict1={0:"A",1:"B",2:"C",3:"D",4:"E",5:"F",6:"G",7:"H",8:"i",9:"k",10:"l",11:"m",12:"n",13:"o",14:"p",15:"q",16:"r",17:"s",18:"t",19:"u",20:"v",21:"w",22:"x",23:"y"}
+    
+    selectbox_text = '<p style="font-family:Ariel; text-align:left; color:peru; font-size:30px;">Do you want to upload an image or click a photo</p>'
+    st.sidebar.markdown(selectbox_text, unsafe_allow_html=True)
+    option = st.sidebar.selectbox("", ('Upload', 'Click Picture'))
+    st.sidebar.write('You selected:', option)
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
 
     if option == 'Upload':
-        file_up = st.file_uploader("Upload an image", type="jpg")
+        upload_image = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Upload an Image</p>'
+        st.markdown(upload_image, unsafe_allow_html=True)
+        file_up = st.file_uploader("", type="jpg")
         # class_btn = st.button("Classify")
         if file_up is not None:    
             image = Image.open(file_up)
@@ -130,7 +161,10 @@ def main():
 
         # if class_btn:
         if file_up is None:
-            st.write("Invalid command, please upload an image")
+            st.text("")
+            st.text("")
+            invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Invalid command, please upload an image</p>'
+            st.markdown(invalid_command, unsafe_allow_html=True)
         else:
             with st.spinner('Model working....'):
                 plt.imshow(image)
@@ -142,7 +176,9 @@ def main():
                 st.pyplot(fig)
 
     else:
-        MAX_FRAMES = st.slider("Select number of frames to render:", min_value=30, max_value=90, value=60, step=30)
+        rendered_frames = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Select number of frames to render:</p>'
+        st.markdown(rendered_frames, unsafe_allow_html=True)
+        MAX_FRAMES = st.slider("", min_value=30, max_value=90, value=60, step=30)
         run = st.button("Click to render server camera")
 
         img = None
@@ -153,16 +189,19 @@ def main():
                 _, img = capture.read()
                 img_display.image(img, channels='BGR')
             capture.release()
-            st.markdown("Render complete")
+            render_complete = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Render complete</p>'
+            st.markdown(render_complete, unsafe_allow_html=True)
             if img is None:
-                st.write("Invalid command, please upload an image")
+                invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Invalid command, please upload an image</p>'
+                st.markdown(invalid_command, unsafe_allow_html=True)
             else:
                 with st.spinner('Model working....'):
                     print('predicting the sign...')
                     predictions = predict(img)
                     time.sleep(1)
                     st.success('Classified')
-                    st.write(predictions)
+                    #st.write(predictions)
+                    st.title(dict1[predictions.item()])
 
 
 if __name__ == "__main__":
