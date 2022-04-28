@@ -188,6 +188,9 @@ def main():
                 time.sleep(1)
                 st.success('Classified')
                 st.title(character)
+                feedback = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Feedback</p>'
+                st.markdown(feedback, unsafe_allow_html=True)
+                st.selectbox("", ('Correct Prediction', 'A' , 'B' ,'C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'))
 
         if file_up is None:
             st.text("")
@@ -225,6 +228,9 @@ def main():
                     time.sleep(1)
                     st.success('Classified')
                     st.title(character)
+                    feedback = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Feedback</p>'
+                    st.markdown(feedback, unsafe_allow_html=True)
+                    st.selectbox("", ('Correct Prediction', 'A' , 'B' ,'C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'))
 
 
 if __name__ == "__main__":
