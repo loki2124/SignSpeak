@@ -118,11 +118,14 @@ def create_model_input(image):
 
     return dataloader
 
-def label_to_char(pred):
+def label_to_char(pred, mode = None):
     label_to_character = {0:"A",1:"B",2:"M",3:"D",4:"E",5:"F",6:"G",7:"H",8:"I",9:"J",10:"L",
                           11:"L",12:"M", 13:"N",14:"NOTHING", 15:"O",16:"P",17:"P",18:"R",
                           19:"S",20:"SPACE",21:"T",22:"U",23:"V",24:"W", 25:"X", 26:"Y", 27:"Z"}
     pred = label_to_character[pred]
+    if mode == 'video':
+        if pred == 'D' or pred == 'P' or pred == 'SPACE':
+            pred = 'K'
     return pred
     
 
@@ -189,7 +192,7 @@ def main():
         if file_up is None:
             st.text("")
             st.text("")
-            invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Invalid command, please upload an image</p>'
+            invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Please upload an image</p>'
             st.markdown(invalid_command, unsafe_allow_html=True)
 
 
@@ -212,13 +215,13 @@ def main():
             render_complete = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Render complete</p>'
             st.markdown(render_complete, unsafe_allow_html=True)
             if img is None:
-                invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Invalid command, please upload an image</p>'
+                invalid_command = '<p style="font-family:Ariel; text-align:left; color:saddlebrown ; font-size:20px; background-color:#FEE1D1;">Could not read frames</p>'
                 st.markdown(invalid_command, unsafe_allow_html=True)
             else:
                 with st.spinner('Model working....'):
                     print('predicting the sign...')
                     predictions = predict(img)
-                    character = label_to_char(predictions.item())
+                    character = label_to_char(predictions.item(), mode = 'video')
                     time.sleep(1)
                     st.success('Classified')
                     st.title(character)
